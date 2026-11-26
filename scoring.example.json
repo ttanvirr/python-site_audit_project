@@ -1,0 +1,21 @@
+{
+  "category_weights": {
+    "Speed": 1,
+    "Responsiveness": 1,
+    "Optimization": 1,
+    "Site Health": 1,
+    "Security": 1,
+    "SEO": 1,
+    "GEO": 1
+  },
+  "check_weight_multipliers": {
+    "Horizontal overflow at 320px": 2.0,
+    "MDN HTTP Observatory score": 1.5
+  },
+  "check_overrides": {
+    "X-Content-Type-Options": {
+      "weight": 1.0,
+      "fail": 0
+    }
+  }
+}

@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Website Audit — {{ report.website.domain }}</title>
+  <style>
+    :root{color-scheme:light;--ink:#162235;--muted:#617084;--line:#dce3eb;--paper:#f4f7fb;--panel:#fff;--blue:#1f5eff;--green:#137547;--amber:#9a6200;--red:#b42318}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.55 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+    .wrap{max-width:1180px;margin:0 auto;padding:34px 24px 64px}.hero{background:#14243b;color:#fff;padding:30px;border-radius:18px;margin-bottom:22px}.eyebrow{text-transform:uppercase;letter-spacing:.12em;font-size:11px;color:#b8c8df;font-weight:700}.hero h1{font-size:30px;line-height:1.2;margin:8px 0 10px}.hero a{color:#cfe0ff}.meta{display:flex;gap:18px;flex-wrap:wrap;color:#d4dfec;font-size:13px}.scoreline{display:flex;align-items:center;gap:24px;margin-top:24px}.score{font-size:60px;font-weight:800;line-height:1;letter-spacing:-.05em}.score small{font-size:19px;color:#d0dced;letter-spacing:0}.coverage{height:8px;background:#34465f;border-radius:20px;overflow:hidden;margin-top:10px;max-width:280px}.coverage span{display:block;height:100%;background:#73a6ff}
+    .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px;margin:18px 0;box-shadow:0 3px 12px rgba(20,36,59,.035)}h2{font-size:19px;margin:0 0 16px}h3{font-size:15px;margin:18px 0 8px}.subtle{color:var(--muted);font-size:13px}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.tile{border:1px solid var(--line);padding:14px;border-radius:12px}.tile .n{font-weight:700;font-size:13px}.tile .v{font-size:26px;font-weight:800;margin:8px 0 2px}.tile .grade{font-size:12px;color:var(--muted)}.status{font-size:11px;text-transform:uppercase;letter-spacing:.06em;font-weight:800;color:var(--muted)}
+    table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:10px 9px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.05em}.pill{display:inline-block;border-radius:99px;padding:3px 8px;background:#edf2f7;color:#435266;font-size:11px;font-weight:800}.pass{color:var(--green)}.fail{color:var(--red)}.warning{color:var(--amber)}.na{color:#68788b}.finding{border-left:3px solid #d6a23d;padding:10px 13px;margin:10px 0;background:#fffaf0;border-radius:0 8px 8px 0}.finding.critical,.finding.high{border-color:var(--red);background:#fff5f4}.finding h4{margin:0 0 4px;font-size:14px}.finding p{margin:4px 0;font-size:13px}.category{scroll-margin-top:20px}.checklist td:first-child{font-weight:650}.links a{color:var(--blue);text-decoration:none}.links a:hover{text-decoration:underline}.limit li{margin:5px 0}.footer{color:var(--muted);font-size:12px;text-align:center;margin-top:26px}
+    @media(max-width:850px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.scoreline{align-items:flex-start;flex-direction:column;gap:8px}}@media(max-width:560px){.wrap{padding:18px 12px 40px}.hero{padding:22px}.hero h1{font-size:24px}.grid{grid-template-columns:1fr 1fr}.score{font-size:48px}.panel{padding:16px}table{display:block;overflow-x:auto;white-space:normal}}
+    @media print{body{background:white}.wrap{max-width:none;padding:0}.hero{background:#14243b!important;print-color-adjust:exact;-webkit-print-color-adjust:exact}.panel{break-inside:avoid;box-shadow:none}.category{break-before:page}.footer{display:none}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="eyebrow">Technical Website Audit</div>
+    <h1>{{ report.website.domain }}</h1>
+    <div><a href="{{ report.website.final_url }}">{{ report.website.final_url }}</a></div>
+    <div class="meta"><span>Audit: {{ report.website.audit_date }}</span><span>Pages crawled: {{ report.website.pages_crawled }}</span><span>Tool version: {{ report.application.version }}</span></div>
+    <div class="scoreline">
+      <div class="score">{% if report.overall.score is not none %}{{ report.overall.score }}{% else %}N/A{% endif %}<small> / 100</small></div>
+      <div><div><strong>{{ report.overall.grade }}</strong> · {{ report.overall.status }} overall score</div><div class="subtle">{{ report.overall.measured_categories }} of 7 categories measured · {{ report.overall.coverage_percent }}% score coverage</div><div class="coverage"><span style="width:{{ report.overall.coverage_percent }}%"></span></div></div>
+    </div>
+  </header>
+
+  <section class="panel"><h2>Category scorecard</h2><div class="grid">
+    {% for key, category in report.categories.items() %}
+    <div class="tile"><div class="n">{{ category.name }}</div><div class="v">{% if category.score is not none %}{{ category.score }}{% else %}N/A{% endif %}</div><div class="grade">{{ category.grade }} · {{ category.status }}</div></div>
+    {% endfor %}
+  </div></section>
+
+  {% for key, category in report.categories.items() %}
+  <section class="panel category" id="{{ key|lower|replace(' ','-') }}">
+    <h2>{{ category.name }} <span class="pill">{% if category.score is not none %}{{ category.score }}/100{% else %}N/A{% endif %}</span></h2>
+    <p class="subtle">{{ category.summary }}</p>
+    {% if category.checks %}
+    <div style="overflow-x:auto"><table class="checklist"><thead><tr><th>Test</th><th>Result</th><th>Measured value</th><th>Expected / note</th><th>Source</th></tr></thead><tbody>
+    {% for check in category.checks %}
+    <tr><td>{{ check.name }}</td><td class="{{ check.status }}">{{ check.status|upper }}</td><td>{{ check.value if check.value is not none else '—' }}</td><td>{{ check.expected if check.expected is not none else check.message }}</td><td>{% if check.source_url %}<a href="{{ check.source_url }}">{{ check.source }}</a>{% else %}{{ check.source }}{% endif %}</td></tr>
+    {% endfor %}
+    </tbody></table></div>
+    {% else %}<p class="subtle">No test data collected.</p>{% endif %}
+    {% if category.findings %}<h3>Issues and recommendations</h3>
+      {% for finding in category.findings %}<div class="finding {{ finding.priority|lower }}"><h4>{{ finding.title }} <span class="pill">{{ finding.priority }}</span></h4><p>{{ finding.what }}</p>{% if finding.why %}<p><strong>Expected:</strong> {{ finding.why }}</p>{% endif %}{% if finding.how_to_fix %}<p><strong>Recommended action:</strong> {{ finding.how_to_fix }}</p>{% endif %}</div>{% endfor %}
+    {% endif %}
+    {% if category.recommendations %}<h3>Category recommendations</h3><ul>{% for item in category.recommendations %}<li>{{ item }}</li>{% endfor %}</ul>{% endif %}
+  </section>
+  {% endfor %}
+
+  <section class="panel"><h2>External tool references</h2><ul class="links">
+    <li><a href="https://pagespeed.web.dev/analysis?url={{ report.website.final_url|urlencode }}">Google PageSpeed Insights report</a></li>
+    <li><a href="https://developer.mozilla.org/en-US/observatory/analyze?host={{ report.website.domain }}">MDN HTTP Observatory</a></li>
+    <li><a href="https://www.ssllabs.com/ssltest/analyze.html?d={{ report.website.domain }}">Qualys SSL Labs</a> <span class="subtle">(linked reference; API scan only when explicitly enabled)</span></li>
+    <li><a href="https://validator.w3.org/nu/?doc={{ report.website.final_url|urlencode }}">W3C Nu HTML Checker</a></li>
+    <li><a href="https://securityheaders.com/?q={{ report.website.final_url|urlencode }}">SecurityHeaders.com</a> <span class="subtle">(interactive service; API key availability may be restricted)</span></li>
+  </ul></section>
+
+  <section class="panel"><h2>Limitations and unavailable measurements</h2>
+    {% if report.limitations %}<ul class="limit">{% for item in report.limitations %}<li>{{ item }}</li>{% endfor %}</ul>{% else %}<p>No material limitations were recorded.</p>{% endif %}
+    <p class="subtle">A category marked N/A is excluded from the overall score. A provisional overall score reflects only measured categories. GEO is a technical readiness assessment unless an AI visibility provider returns actual result data.</p>
+  </section>
+  <div class="footer">Generated {{ generated_at }} · Site Audit {{ report.application.version }} · Scores are deterministic estimates based on the checks and weights documented in README.md.</div>
+</div>
+</body>
+</html>
